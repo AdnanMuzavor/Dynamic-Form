@@ -1,105 +1,98 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getAllcocktails } from "../actions/GetCocktails";
-import { Link } from "react-router-dom";
-import LoadingComp from "./Loading";
-import CockTailCard from "../components/CocktailCard";
-import Header from "../components/Header";
-const HomeScreen = () => {
-  const cocktails = useSelector((state) => state.cocktails);
-  const { loading, Allcocktails, error } = cocktails;
-  const dispatch = useDispatch();
-  const [search, setsearch] = useState("");
-  const [searchdata, setsearchdata] = useState([]);
+import React, { useState } from "react";
 
-  const searchhandler = () => {
-    const Require = Allcocktails.filter((e) => {
-      return Object.values(e.strDrink)
-        .join("")
-        .toLowerCase()
-        .includes(search.toLowerCase());
-    });
-    setsearchdata(Require);
-    console.log(Require);
+import { useHistory } from "react-router";
+import { useStore } from "react-redux";
+import logo from "../Assets/logo.jpg";
+const HomeScreen = () => {
+  const history = useHistory();
+  const [img, setimg] = useState(logo);
+  const ImageChangeHandler = (e) => {
+    let img1 = e.target.files[0];
+    setimg(URL.createObjectURL(img1));
   };
-  useEffect(() => {
-    dispatch(getAllcocktails());
-  }, []);
-  return loading ? (
-    <LoadingComp />
-  ) : (
+  const [business, setbusiness] = useState({
+    businessname: "",
+    businesstype: "Hotel",
+    businesslogo: img,
+  });
+  const SubmitHandler = (e) => {
+    e.preventDefault();
+    if (
+      business.businessname === "" ||
+      business.businesstype === "" ||
+      business.businesslogo === ""
+    ) {
+      alert("Fill all the fields.");
+      return;
+    }
+
+    history.push(`/form/image?${img}&&name=${business.businessname}`);
+  };
+
+  const Changedetected = (e) => {
+    e.preventDefault();
+    const { name, value } = e.target;
+    setbusiness((prev) => {
+      return { ...prev, [name]: value };
+    });
+  };
+  return (
     <>
-      <Header />
-      <div className="row d-flex flex-direction-row justify-content-center">
-        <div className="col-12 col-md-6 col-lg-6 ">
-          <div className="row d-flex flex-direction-row justify-content-center">
-            <input
-              type="text"
-              placeholder="Enter the cocktail name"
-              className="col-9 col-lg-8 col-md-8 searchitem mt-3"
-              name="search"
-              value={search}
-              autoComplete="off"
-              onChange={(e) => {
-                setsearch(e.target.value);
-              }}
-            />
-            <button
-              className="text-center srchbtn  mx-auto mb-2 imgbtn col-5 col-lg-3 col-md-3 mt-3"
-              onClick={searchhandler}
-            >
-              <i class="fa fa-search icon" aria-hidden="true"></i>
-              search
-            </button>
+      {" "}
+      <section className="container formwrapper">
+        <div className="col-md-12 col-lg-12 col-12 mx-auto col">
+          <img src={img} alt="Hotel logo" className="img-fluid" />
+        </div>
+        <h4 className="text-center">Fill up business details</h4>
+        <div className="container col-10 col-md-6 col-lg-6 ">
+          <div className="form mb-3" onSubmit={SubmitHandler}>
+            {/* form component-1 */}
+            <div className="formcomp">
+              <h6 className="ms-4">Select type</h6>
+              <select
+                className="ms-4"
+                value={business.businesstype}
+                onChange={Changedetected}
+                name="businesstype"
+              >
+                <option>Hotel</option>
+                <option>Restaurant</option>
+              </select>
+            </div>
+
+            {/* form component-2 */}
+            <div className="formcomp">
+              <h6 className="ms-4">Business name</h6>
+              <input
+                className="ms-4"
+                type="text"
+                placeholder="Enter your Business name"
+                name="businessname"
+                value={business.businessname}
+                onChange={Changedetected}
+              />
+            </div>
+
+            {/* form component-3 */}
+            <div className="formcomp">
+              <h6 className="ms-4">Upload business logo</h6>
+              <input
+                className="ms-4"
+                type="file"
+                name="myImage"
+                onChange={ImageChangeHandler}
+              />
+            </div>
+            <div className="formcomp">
+              <h6 className="ms-4">Hit to proceeed</h6>
+              <div className="btn ms-4 " onClick={SubmitHandler}>
+                <input className="btnin" type="submit" value="proceed"></input>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div className="row blogcontainer mx-auto mt-5">
-        {search !== "" ? (
-          searchdata.length >= 1 ? (
-            <div className=" topic text-center">
-              <p>Search result</p>
-            </div>
-          ) : (
-            <div className=" topic text-center">
-              <p>No cocktails with given name</p>
-            </div>
-          )
-        ) : (
-          <div className=" topic text-center">
-            <p>All cocktails</p>
-          </div>
-        )}
-        {/* when nothing search, all cocktails will be displayed else search result */}
-        {search === ""
-          ? Allcocktails.map((e) => {
-              return (
-                <Link
-                  to={`/getacocktail/${e.idDrink}`}
-                  className="col-10 col-md-3 col-lg-3 blogcard"
-                >
-                  <img src={e.strDrinkThumb} className="img-fluid"></img>
-                  <div>
-                    <h4 className="text-center">{e.strDrink}</h4>
-                  </div>
-                </Link>
-              );
-            })
-          : searchdata.length >= 1
-          ? searchdata.map((e) => {
-              return (
-                <CockTailCard
-                  key={e.idDrink}
-                  img={e.strDrinkThumb}
-                  name={e.strDrink}
-                />
-              );
-            })
-          : null}
-      </div>
+      </section>
     </>
   );
 };
-
 export default HomeScreen;
