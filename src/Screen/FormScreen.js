@@ -16,6 +16,11 @@ const FormScreen = (props) => {
     "radio",
     "dropdown",
   ]);
+  const [readyforradio, setreadyforradio] = useState(false);
+  const [radiocount, setradiocount] = useState(0);
+  const [iterator, setiterat] = useState(0);
+  const [commontext, setcommontext] = useState("");
+  const [radioopts, setradiopts] = useState([]);
   const data = props.location.search;
   useEffect(() => {
     alert(
@@ -31,6 +36,7 @@ const FormScreen = (props) => {
   const [nameinput, setnameinput] = useState("");
   const [placeholdertxt, setplaceholdertxt] = useState("");
   const [selected, setselected] = useState("");
+  const [isimp, setisimp] = useState(false);
 
   const AddToFormHandler = (attribute) => {
     setselected(attribute);
@@ -42,37 +48,54 @@ const FormScreen = (props) => {
   };
 
   //For allowing to take in user inputs for radio
-  const TakeRadiosHandler = () => {};
+  const TakeRadiosHandler = () => {
+    if(radiocount==0){
+      alert("Inavalid radio count")
+      return;
+    }
+    setreadyforradio(true);
+  };
 
   //Placing each option for radio in array
-  const TakeRadiosHandler2 = (i, i2) => {};
+  const TakeRadiosHandler2 = (i, i2) => {
+    setiterat(iterator + 1);
+    setradiopts((prev) => [...prev, commontext]);
+    setcommontext("");
+    console.log(iterator);
+  };
   //For dropdown field
   function finaliseddropdownhandler() {
     var popup = document.getElementById("myPopup");
     popup.classList.toggle("show");
     const pg = document.querySelector(".pgcontent");
     pg.classList.toggle("opec");
-
   }
 
   //For radio field/append radio field after necessary info is taken
   function finaliseradiohandler() {
     var popup = document.getElementById("myPopup");
+    if(radioopts.length===0){
+      alert("No options added yet!");
+      return;
+    }
     popup.classList.toggle("show");
     const pg = document.querySelector(".pgcontent");
     pg.classList.toggle("opec");
 
+    setradiopts([]);
+    setreadyforradio(false);
+    setiterat(0);
+    setradiocount(0);
+    setplaceholdertxt("");
+    setnameinput("");
   }
 
   const SubmitHandler = () => {};
 
   //For text/date/number fields
   function FinaliseAttrbute() {
-    //  myFunction(selected)
-    var popup = document.getElementById("myPopup");
-    popup.classList.toggle("show");
-    const pg = document.querySelector(".pgcontent");
-    pg.classList.toggle("opec");
+  //  myFunction(selected)
+
     //As date/radio hv only one input fields
     if (selected === "date" || selected === "radio") {
       if (!nameinput) {
@@ -88,6 +111,60 @@ const FormScreen = (props) => {
       }
     }
 
+    //To remove pop-up
+    var popup = document.getElementById("myPopup");
+    popup.classList.toggle("show");
+    const pg = document.querySelector(".pgcontent");
+    pg.classList.toggle("opec");
+    //To attend created elements to form
+    const form = document.querySelector(".form");
+
+    const createcomp = () => {
+      return React.createElement("Ratingcomp");
+    };
+
+    if (selected === "rating") {
+      //Method-2
+      // }
+    } else {
+      //Each element will be enclose in flex container
+
+      var div = document.createElement("div");
+      div.setAttribute("class", "flexer");
+      var element;
+
+      //Making input of selected type
+      element = document.createElement("input");
+      element.setAttribute("type", selected);
+
+      if (isimp) {
+        element.setAttribute("required", true);
+      }
+      //Setting placeholder
+      element.setAttribute("placeholder", placeholdertxt);
+
+      element.setAttribute("class", "flexer");
+
+      console.log(
+        `type of ${typeof placeholdertxt} and val: ${placeholdertxt}`
+      );
+      //Setting label of the input
+      var label = document.createElement("h6");
+      label.setAttribute("for", nameinput);
+      if (isimp) {
+        label.innerHTML = "* " + nameinput;
+        setisimp(false);
+      } else {
+        label.innerHTML = nameinput;
+      }
+      //appending label and element in div
+      div.appendChild(label);
+      div.appendChild(element);
+
+      //Appending div to form
+      form.appendChild(div);
+    }
+
     setplaceholdertxt("");
     setnameinput("");
   }
@@ -98,6 +175,17 @@ const FormScreen = (props) => {
         <div className="popup col-10 col-md-6 col-lg-6 ">
           <span className="popuptext " id="myPopup">
             <p className="text-center">Fill up required fields</p>
+            <div className="imp">
+              <p>Is important</p>
+              <input
+                type="checkbox"
+                id="checkbox"
+                checked={isimp}
+                required
+                onChange={(e) => (isimp ? setisimp(false) : setisimp(true))}
+                placeholder="Enter no of radio buttons"
+              ></input>
+            </div>
             <input
               type="text"
               value={nameinput}
@@ -112,8 +200,48 @@ const FormScreen = (props) => {
             ></input>
 
             {/* Condition for selected===radio/dropdown */}
+            {(selected === "radio" || selected === "dropdown") &&
+            !readyforradio ? (
+              <>
+                <input
+                  type="number"
+                  value={radiocount}
+                  onChange={(e) => setradiocount(e.target.value)}
+                  placeholder="Enter no of radio buttons"
+                ></input>
+                <button className="btn noanim" onClick={TakeRadiosHandler}>
+                  Submit count
+                </button>
+              </>
+            ) : null}
 
             {/* Condition for selected===radio/dropdown  and ready for radio*/}
+            {(selected === "radio" || selected === "dropdown") &&
+            readyforradio ? (
+              <>
+                {iterator < Number(radiocount) ? (
+                  <>
+                    <input
+                      className="radios"
+                      id={iterator}
+                      type="text"
+                      placeholder={`Option number ${iterator + 1}`}
+                      onChange={(e) => setcommontext(e.target.value)}
+                      value={commontext}
+                    ></input>
+                    <button
+                      className="btn noanim"
+                      id={iterator + 1 * 10}
+                      onClick={() =>
+                        TakeRadiosHandler2(iterator, iterator + 1 * 10)
+                      }
+                    >
+                      Submit option {iterator + 1}
+                    </button>
+                  </>
+                ) : null}
+              </>
+            ) : null}
 
             {/* since date/radio/dropdown hv no placeholder field */}
             {selected === "radio" ||

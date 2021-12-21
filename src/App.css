@@ -298,3 +298,24 @@ select {
     background-color: lightgreen;
   }
 }
+
+/* Removes animation if any */
+.noanim{
+  animation: none !important;
+}
+
+/* To allign check box and label side by side */
+
+.imp{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.imp p{
+  margin: 0.2rem;
+}
+input[type="checkbox"]{
+  margin-top: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+}
